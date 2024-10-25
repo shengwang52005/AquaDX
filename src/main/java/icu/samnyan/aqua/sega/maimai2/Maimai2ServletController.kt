@@ -222,6 +222,10 @@ class Maimai2ServletController(
     val getGameNgMusicId = BaseHandler { mapOf("length" to 0, "musicIdList" to empty) }
     val getGameRanking = BaseHandler { mapOf("type" to it["type"].toString(), "gameRankingList" to empty) }
     val getGameTournamentInfo = BaseHandler { mapOf("length" to 0, "gameTournamentInfoList" to empty) }
+    val getGameKaleidxScope = BaseHandler { mapOf("gameKaleidxScopeList" to empty) }
+    val getUserKaleidxScope = UserReqHandler { _, uid -> mapOf("userId" to uid, "userKaleidxScopeList" to empty) }
+    val getUserNewItem = UserReqHandler { _, uid -> mapOf("userId" to uid, "itemKind" to 0, "itemId" to 0) }
+    val getUserNewItemList = UserReqHandler { _, uid -> mapOf("userId" to uid, "userItemList" to empty) }
 
     val getGameSetting = BaseHandler {
         // The client-side implementation for reboot time is extremely cursed.
@@ -289,6 +293,15 @@ class Maimai2ServletController(
         "userMissionDataList" to empty
     ) }
 
+    val getGameMusicScore = BaseHandler { mapOf(
+        "gameMusicScore" to mapOf(
+            "musicId" to 0,
+            "level" to 0,
+            "type" to 0,
+            "scoreData" to ""
+        )
+    ) }
+
     val endpointList = setOf("GetGameEventApi", "GetGameRankingApi", "GetGameSettingApi", "GetGameTournamentInfoApi", "GetGameWeeklyDataApi",
         "GetTransferFriendApi", "GetUserActivityApi", "GetUserCardApi", "GetUserCharacterApi", "GetUserDataApi",
         "GetUserExtendApi", "GetUserFavoriteApi", "GetUserGhostApi", "GetUserItemApi", "GetUserLoginBonusApi",
@@ -303,7 +316,8 @@ class Maimai2ServletController(
         "CMUpsertUserPrintlogApi", "GetUserFavoriteItemApi", "GetUserRivalDataApi", "GetUserRivalMusicApi",
         "GetUserScoreRankingApi", "UpsertClientBookkeepingApi", "UpsertClientSettingApi",
         "UpsertClientTestmodeApi", "UpsertClientUploadApi", "Ping", "RemoveTokenApi", "CMLoginApi", "CMLogoutApi",
-        "CMUpsertBuyCardApi", "GetGameSettingApi").toMutableList()
+        "CMUpsertBuyCardApi", "GetGameSettingApi", "GetGameKaleidxScopeApi", "GetGameMusicScoreApi",
+        "GetUserKaleidxScopeApi", "GetUserNewItemApi", "GetUserNewItemListApi").toMutableList()
 
     val noopEndpoint = endpointList.popAll("GetUserScoreRankingApi", "UpsertClientBookkeepingApi",
         "UpsertClientSettingApi", "UpsertClientTestmodeApi", "UpsertClientUploadApi", "Ping", "RemoveTokenApi",
