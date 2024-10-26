@@ -64,8 +64,8 @@ class Maimai2(
         val b35Str = extra["recent_rating"] ?: (400 - "No rating found")
         val b15Str = extra["recent_rating_new"] ?: (400 - "No rating found")
 
-        val b35 = b35Str.split(',').map { it.split(':') }
-        val b15 = b15Str.split(',').map { it.split(':') }
+        val b35 = b35Str.split(',').filterNot { it.isBlank() }.map { it.split(':') }
+        val b15 = b15Str.split(',').filterNot { it.isBlank() }.map { it.split(':') }
 
         val musicIdList = listOf(
             b35.map { it[0].toInt() },
