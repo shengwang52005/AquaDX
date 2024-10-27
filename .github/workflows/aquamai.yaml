@@ -31,6 +31,21 @@ jobs:
           cd AquaMai
           dotnet build -c Release
 
+      - name: Make example config
+        shell: cmd
+        run: |
+          cd AquaMai\Output
+          dotnet tool install -g dotnet-script
+          dotnet script genConfig.csx
+
+      - name: Prepare artifact
+        shell: cmd
+        run: |
+          cd AquaMai\Output
+          mkdir Upload
+          move AquaMai.dll Upload
+          move AquaMai.*.toml Upload
+  
       - uses: actions/upload-artifact@v4
         with:
           name: AquaMai
@@ -39,10 +54,16 @@ jobs:
       - name: Send to Telegram
         if: github.event_name != 'pull_request'
         run: |
-          $Uri = "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument"
+          $Uri = "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMediaGroup"
           $Form = @{
             chat_id = "-1002231087502"
-            caption = "${{ github.event.commits[0].message }}"
-            document = Get-Item AquaMai\Output\AquaMai.dll
+            media = @(
+              @{ type = "document"; media = "attach://aquamai_main"; caption = "${{ github.event.commits[0].message }}" },
+              @{ type = "document"; media = "attach://aquamai_zh" }
+              @{ type = "document"; media = "attach://aquamai_en" }
+            ) | ConvertTo-Json
+            aquamai_main = Get-Item AquaMai\Output\Upload\AquaMai.dll
+            aquamai_zh = Get-Item AquaMai\Output\Upload\AquaMai.zh.toml
+            aquamai_en = Get-Item AquaMai\Output\Upload\AquaMai.en.toml
           }
           Invoke-RestMethod -Uri $uri -Form $Form -Method Post
