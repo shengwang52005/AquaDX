@@ -122,13 +122,19 @@ class UpsertUserAllHandler(
             repos.userFavorite.saveAll(news.mapApply {
                 id = repos.userFavorite.findByUserAndItemKind(u, itemKind)()?.id ?: 0 }) }
 
-        req.userActivityList?.let { news ->
-            repos.userAct.saveAll(news.flatMap { listOf(it.musicList, it.playList) }.flatten()
-                .filter { it.kind != 0 && it.activityId != 0 }
-                .mapApply {
-                    id = repos.userAct.findByUserAndKindAndActivityId(u, kind, activityId)()?.id ?: 0
-                    user = u
-                }.sortedBy { it.sortNumber })
+        // 2024/10/31 Found some user data findByUserAndKindAndActivityId is not unique
+        // I think userActivityList is not important, so I will ignore it
+        try {
+            req.userActivityList?.let { news ->
+                repos.userAct.saveAll(news.flatMap { listOf(it.musicList, it.playList) }.flatten()
+                    .filter { it.kind != 0 && it.activityId != 0 }
+                    .mapApply {
+                        id = repos.userAct.findByUserAndKindAndActivityId(u, kind, activityId)()?.id ?: 0
+                        user = u
+                    }.sortedBy { it.sortNumber })
+            }
+        } catch (e: Exception) {
+            logger.error("Error saving user activity", e)
         }
 
         if(req.isNewFavoritemusicList == "0")
