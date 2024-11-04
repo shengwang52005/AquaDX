@@ -37,10 +37,12 @@ class CardController(
 
     @API("/summary")
     @Doc("Get a summary of the card, including the user's name, rating, and last login date.", "Summary of the card")
-    suspend fun summary(@RP cardId: Str): Any
-    {
+    suspend fun summary(@RP cardId: Str, @RP token: Str): Any {
+        val user = jwt.auth(token)
         // DO NOT CHANGE THIS ERROR MESSAGE - The frontend uses it to detect if the card is not found
         val card = cardService.tryLookup(cardId) ?: (404 - "Card not found")
+
+        if (card.aquaUser != null && card.aquaUser?.auId != user.auId) (404 - "Card not found")
 
         // Lookup data for each game
         return mapOf(
@@ -133,20 +135,21 @@ class CardController(
  *
  * Assumption: The card is already linked to the user.
  */
-suspend fun <T : IUserData> migrateCard(repo: GenericUserDataRepo<T>, cardRepo: CardRepository, card: Card): Bool
-{
+suspend fun <T : IUserData> migrateCard(repo: GenericUserDataRepo<T>, cardRepo: CardRepository, card: Card): Bool {
     val ghost = card.aquaUser!!.ghostCard
 
     // Check if data already exists in the user's ghost card
     async { repo.findByCard(ghost) }?.let {
         // Create a new dummy card for deleted data
-        it.card = async { cardRepo.save(Card().apply {
-            luid = "Migrated data of ghost card ${ghost.id} for user ${card.aquaUser!!.auId} on ${LocalDateTime.now(ZoneOffset.UTC).isoDateTime()}"
-            // Randomize an extId outside the normal range
-            extId = Random.nextLong(0x7FFFFFF7L shl 32, 0x7FFFFFFFL shl 32)
-            registerTime = LocalDateTime.now()
-            accessTime = registerTime
-        }) }
+        it.card = async {
+            cardRepo.save(Card().apply {
+                luid = "Migrated data of ghost card ${ghost.id} for user ${card.aquaUser!!.auId} on ${LocalDateTime.now(ZoneOffset.UTC).isoDateTime()}"
+                // Randomize an extId outside the normal range
+                extId = Random.nextLong(0x7FFFFFF7L shl 32, 0x7FFFFFFFL shl 32)
+                registerTime = LocalDateTime.now()
+                accessTime = registerTime
+            })
+        }
         async { repo.save(it) }
     }
 
@@ -158,8 +161,7 @@ suspend fun <T : IUserData> migrateCard(repo: GenericUserDataRepo<T>, cardRepo: 
     return true
 }
 
-suspend fun getSummaryFor(repo: GenericUserDataRepo<*>, card: Card): Map<Str, Any>?
-{
+suspend fun getSummaryFor(repo: GenericUserDataRepo<*>, card: Card): Map<Str, Any>? {
     val data = async { repo.findByCard(card) } ?: return null
     return mapOf(
         "name" to data.userName,
@@ -199,18 +201,20 @@ class CardGameService(
         }
     }
 
-    suspend fun getSummary(card: Card) = async { mapOf(
-        "mai2" to getSummaryFor(maimai2, card),
-        "chu3" to getSummaryFor(chusan, card),
-        "ongeki" to getSummaryFor(ongeki, card),
-        "wacca" to getSummaryFor(wacca, card),
-        "diva" to diva.findByPdId(card.extId).getOrNull()?.let {
-            mapOf(
-                "name" to it.playerName,
-                "rating" to it.level,
-            )
-        },
-    ) }
+    suspend fun getSummary(card: Card) = async {
+        mapOf(
+            "mai2" to getSummaryFor(maimai2, card),
+            "chu3" to getSummaryFor(chusan, card),
+            "ongeki" to getSummaryFor(ongeki, card),
+            "wacca" to getSummaryFor(wacca, card),
+            "diva" to diva.findByPdId(card.extId).getOrNull()?.let {
+                mapOf(
+                    "name" to it.playerName,
+                    "rating" to it.level,
+                )
+            },
+        )
+    }
 
     // Every hour
     @Scheduled(fixedDelay = 3600000)
