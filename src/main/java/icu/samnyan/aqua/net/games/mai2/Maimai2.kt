@@ -111,7 +111,7 @@ class Maimai2(
         val newNameFull = toFullWidth(newName)
         us.cardByName(u.username) { card ->
             val user = userDataRepo.findByCard(card) ?: (404 - "User not found")
-            settableFields["userName"]?.invoke(user, newNameFull)
+            user.userName = newNameFull
             userDataRepo.save(user)
         }
         mapOf("newName" to newNameFull)
