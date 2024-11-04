@@ -26,6 +26,8 @@ export interface AquaNetUser {
   ghostCard: Card
   cards: Card[]
   computedName: string,
+  password: string,
+  optOutOfLeaderboard: boolean,
 }
 
 export interface CardSummaryGame {

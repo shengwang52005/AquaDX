@@ -9,6 +9,7 @@ import icu.samnyan.aqua.sega.allnet.KeychipSession
 import icu.samnyan.aqua.sega.general.dao.CardRepository
 import icu.samnyan.aqua.sega.general.model.Card
 import jakarta.persistence.*
+import lombok.Builder
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -52,6 +53,7 @@ class AquaNetUser(
     var profileLocation: String? = "",
     var profileBio: String? = "",
     var profilePicture: String? = "",
+    var optOutOfLeaderboard: Boolean = false,
 
     // Email confirmation
     var emailConfirmed: Boolean = false,
@@ -194,4 +196,6 @@ class AquaUserServices(
         // Check if profile bio is valid
         if (length > 255) 400 - "Profile bio too long (max 255 letters)"
     }
+
+    fun checkOptOutOfLeaderboard(optOutOfLeaderboard: Str) = optOutOfLeaderboard.toBoolean()
 }

@@ -148,6 +148,8 @@ const zhSettings: typeof EN_REF_SETTINGS = {
   'settings.fields.waccaAlwaysVip.desc': '将 VIP 到期时间设置为 2077-01-01',
   'settings.fields.rounding.name': '分数舍入',
   'settings.fields.rounding.desc': '把分数四舍五入到一位小数',
+  'settings.fields.optOutOfLeaderboard.name': '不参与排行榜',
+  'settings.fields.optOutOfLeaderboard.desc': '登录之后还是可以在排行榜上看到自己',
   'settings.mai2.name': '玩家名字',
   'settings.profile.picture': '头像',
   'settings.profile.upload-new': '上传',

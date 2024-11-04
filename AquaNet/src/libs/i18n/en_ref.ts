@@ -139,6 +139,8 @@ export const EN_REF_SETTINGS = {
   'settings.fields.waccaAlwaysVip.desc': 'Set VIP expiration date to 2077-01-01',
   'settings.fields.rounding.name': 'Score Rounding',
   'settings.fields.rounding.desc': 'Round the score to one decimal place',
+  'settings.fields.optOutOfLeaderboard.name': 'Opt Out of Leaderboard',
+  'settings.fields.optOutOfLeaderboard.desc': 'You will still be able to see yourself on the leaderboard after logging in',
   'settings.mai2.name': 'Player Name',
   'settings.profile.picture': 'Profile Picture',
   'settings.profile.upload-new': 'Upload New',

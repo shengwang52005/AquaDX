@@ -50,7 +50,7 @@ abstract class GameApiController<T : IUserData>(name: String, userDataClass: KCl
         // TODO: pagination
         // Shadow-ban: Do not show banned cards in the ranking except for the user who owns the card
         val players = userDataRepo.findAll().sortedByDescending { it.playerRating }
-            .filter { it.card?.rankingBanned != true || it.card?.aquaUser?.let { it == reqUser } ?: false }
+            .filter { (it.card?.rankingBanned != true && it.card?.aquaUser?.optOutOfLeaderboard != true) || it.card?.aquaUser?.let { it == reqUser } ?: false }
         return players.filter { it.card != null }.mapIndexed { i, user ->
             val card = user.card!!
             val plays = playlogRepo.findByUserCardExtId(card.extId)

@@ -28,12 +28,11 @@
     [ 'password', t('settings.profile.password') ],
     [ 'profileLocation', t('settings.profile.location') ],
     [ 'profileBio', t('settings.profile.bio') ],
-  ]
+  ] as const
 
   // Fetch user data
   const getMe = () => USER.me().then((m) => {
     me = m
-    values = profileFields.map(([field]) => me[field as keyof AquaNetUser])
 
     CARD.userGames(m.username).then(games => {
       if (games.chu3 && !tabs.includes('chu3')) {
@@ -49,7 +48,6 @@
   }).catch(e => error = e.message)
   getMe()
 
-  let values = Array(profileFields.length).fill('')
   let changed: string[] = []
   let pfpField: HTMLInputElement
 
@@ -92,7 +90,7 @@
     </nav>
   </div>
 
-  {#if tab === 0}
+  {#if tab === 0 && me}
     <!-- Tab 0: Profile settings -->
     <div out:fade={FADE_OUT} in:fade={FADE_IN} class="fields">
       <div class="field">
@@ -118,10 +116,10 @@
           <label for={field}>{name}</label>
           <div>
             <input id={field} type="text" use:passwordAction={field === 'password'}
-                   bind:value={values[i]} on:input={() => changed = [...changed, field]}
+                   bind:value={me[field]} on:input={() => changed = [...changed, field]}
                    placeholder={field === 'password' ? t('settings.profile.unchanged') : t('settings.profile.unset')}/>
-            {#if changed.includes(field) && values[i]}
-              <button transition:slide={{axis: 'x'}} on:click={() => submit(field, values[i])}>
+            {#if changed.includes(field) && me[field]}
+              <button transition:slide={{axis: 'x'}} on:click={() => submit(field, me[field])}>
                 {#if submitting === field}
                   <Icon icon="line-md:loading-twotone-loop" />
                 {:else}
@@ -132,6 +130,16 @@
           </div>
         </div>
       {/each}
+      <div class="field m-t">
+        <div class="bool">
+          <input id="optOutOfLeaderboard" type="checkbox" bind:checked={me.optOutOfLeaderboard}
+                 on:change={() => submit('optOutOfLeaderboard', me.optOutOfLeaderboard.toString())}/>
+          <label for="optOutOfLeaderboard">
+            <span class="name">{ts(`settings.fields.optOutOfLeaderboard.name`)}</span>
+            <span class="desc">{ts(`settings.fields.optOutOfLeaderboard.desc`)}</span>
+          </label>
+        </div>
+      </div>
     </div>
   {:else if tabs[tab] === 'chu3'}
     <!-- Userbox settings -->
@@ -154,6 +162,18 @@
     display: flex
     flex-direction: column
     gap: 12px
+
+  .bool
+    display: flex
+    align-items: center
+    gap: 1rem
+
+    label
+      display: flex
+      flex-direction: column
+
+      .desc
+        opacity: 0.6
 
   .field
     display: flex
